@@ -1,0 +1,7 @@
+{
+  "nama": "kora-3d-penuh",
+  "versi": "1.0",
+  "warisi": ["kora-3d-lengkap.json", "tekstur-siap.json"],
+  "catatan": "Bentuk + pipeline + topologi + tekstur. Ini spek terlengkap yang bisa ditulis alat ini.",
+  "aturan": []
+}

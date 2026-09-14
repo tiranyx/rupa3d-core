@@ -1,0 +1,819 @@
+<title>__JUDUL__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Halaman ini SENGAJA satu tema. Viewer 3D yang chrome-nya ikut tema terang
+     akan melawan render-nya sendiri: panel putih di sebelah bayangan lembut
+     membuat mata menilai paparan gambar dari panelnya, bukan dari adegannya.
+     Karena itu latar dicat eksplisit dan tidak menumpang tema tuan rumah.
+
+     IBM Plex dipilih karena ia keluarga huruf INSTRUMENTASI — dirancang untuk
+     papan ukur dan dokumentasi teknik, bukan untuk antarmuka umum. Alat ini
+     menampilkan angka yang harus dipercaya; hurufnya sebaiknya berasal dari
+     dunia yang sama. */
+  :root {
+    --tinta: #e8ecf4; --redup: #8b93a6; --garis: #ffffff1a;
+    --panel: #0e1219cc; --aksen: #5eead4; --gagal: #f87171; --lulus: #4ade80;
+    --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  }
+  html, body { height: 100%; }
+  body { background: #070a0f; color: var(--tinta); font-family: var(--sans); overflow: hidden; }
+  #panggung { position: fixed; inset: 0; }
+  canvas { display: block; touch-action: none; }
+
+  .panel {
+    position: fixed; background: var(--panel); border: 1px solid var(--garis);
+    border-radius: 10px; backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    box-shadow: 0 10px 40px #0009; font-size: 12px; line-height: 1.55;
+  }
+
+  #kepala { top: 14px; left: 14px; padding: 10px 14px; max-width: min(46vw, 380px); }
+  #kepala h1 { font-size: 13px; font-weight: 600; letter-spacing: .01em; margin-bottom: 2px; }
+  #kepala .sub { color: var(--redup); font-family: var(--mono); font-size: 11px; }
+
+  #angka {
+    bottom: 14px; left: 14px; padding: 9px 13px;
+    font-family: var(--mono); font-size: 11px; color: var(--redup);
+    display: flex; gap: 14px; flex-wrap: wrap;
+  }
+  #angka b { color: var(--tinta); font-weight: 600; font-variant-numeric: tabular-nums; }
+  #pilihan dd { font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) { #muat { transition: none; } }
+  :focus-visible { outline: 2px solid var(--aksen); outline-offset: 2px; }
+
+  #pilihan {
+    top: 14px; right: 14px; width: 258px; padding: 12px 14px; display: none;
+  }
+  #pilihan.tampak { display: block; }
+  #pilihan h2 { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+  #pilihan dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-family: var(--mono); font-size: 11px; }
+  #pilihan dt { color: var(--redup); }
+  #pilihan dd { text-align: right; overflow-wrap: anywhere; }
+  #tutup {
+    position: absolute; top: 8px; right: 10px; cursor: pointer; color: var(--redup);
+    background: none; border: 0; font-size: 15px; line-height: 1; padding: 2px 4px;
+  }
+  #tutup:hover { color: var(--tinta); }
+
+  #sertifikat { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--garis); }
+  .lencana {
+    display: inline-block; padding: 1px 7px; border-radius: 999px;
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+  }
+  .lencana.lulus { background: #4ade8026; color: var(--lulus); }
+  .lencana.gagal { background: #f8717126; color: var(--gagal); }
+
+  #putar {
+    bottom: 14px; left: 50%; transform: translateX(-50%);
+    padding: 7px 10px; display: none; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px;
+  }
+  #putar.tampak { display: flex; }
+  #putar button {
+    background: #ffffff14; border: 1px solid var(--garis); border-radius: 6px;
+    color: var(--tinta); font: inherit; padding: 3px 9px; cursor: pointer;
+    min-width: 30px;
+  }
+  #putar button:hover { background: #ffffff24; }
+  #putar select {
+    background: #ffffff14; border: 1px solid var(--garis); border-radius: 6px;
+    color: var(--tinta); font: inherit; padding: 3px 6px; max-width: 150px;
+  }
+  #garis-waktu {
+    -webkit-appearance: none; appearance: none; width: 190px; height: 4px;
+    background: #ffffff26; border-radius: 999px; cursor: pointer;
+  }
+  #garis-waktu::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%;
+    background: var(--aksen); cursor: pointer;
+  }
+  #garis-waktu::-moz-range-thumb {
+    width: 11px; height: 11px; border: 0; border-radius: 50%; background: var(--aksen);
+  }
+  #jam { color: var(--redup); font-variant-numeric: tabular-nums; min-width: 74px; }
+
+  #fisika {
+    top: 14px; right: 14px; padding: 7px 11px; display: none;
+    align-items: center; gap: 9px; font-family: var(--mono); font-size: 11px;
+  }
+  #fisika.tampak { display: flex; }
+  #fisika button {
+    background: #ffffff14; border: 1px solid var(--garis); border-radius: 6px;
+    color: var(--tinta); font: inherit; padding: 3px 9px; cursor: pointer;
+  }
+  #fisika button:hover { background: #ffffff24; }
+  #fisika .angka { color: var(--redup); font-variant-numeric: tabular-nums; }
+  /* Panel pilihan turun kalau bilah fisika memakai sudut yang sama. */
+  #pilihan.dengan-fisika { top: 58px; }
+
+  #bantuan {
+    bottom: 14px; right: 14px; padding: 8px 12px;
+    font-family: var(--mono); font-size: 10.5px; color: var(--redup);
+  }
+  #bantuan kbd {
+    background: #ffffff14; border: 1px solid var(--garis); border-radius: 4px;
+    padding: 0 4px; font-family: inherit; color: var(--tinta);
+  }
+  #muat {
+    position: fixed; inset: 0; display: grid; place-items: center;
+    font-family: var(--mono); font-size: 12px; color: var(--redup);
+    background: #070a0f; transition: opacity .5s; z-index: 10;
+  }
+  #muat.pergi { opacity: 0; pointer-events: none; }
+  @media (max-width: 640px) {
+    #pilihan { top: auto; bottom: 72px; right: 10px; left: 10px; width: auto; }
+    #bantuan { display: none; }
+    #garis-waktu { width: 110px; }
+    #kepala { max-width: calc(100vw - 28px); }
+  }
+</style>
+
+<div id="panggung"></div>
+
+<div id="kepala" class="panel">
+  <h1 id="judul">—</h1>
+  <div class="sub" id="subjudul">—</div>
+</div>
+
+<div id="angka" class="panel"></div>
+
+<div id="pilihan" class="panel">
+  <button id="tutup" aria-label="tutup">×</button>
+  <h2 id="pilih-nama">—</h2>
+  <dl id="pilih-isi"></dl>
+  <div id="sertifikat"></div>
+</div>
+
+<div id="fisika" class="panel">
+  <button id="fisika-main" aria-label="jalankan / hentikan fisika">&#9654; fisika</button>
+  <button id="fisika-ulang" aria-label="kembalikan ke posisi awal">&#8635;</button>
+  <span class="angka" id="fisika-angka">0 badan</span>
+</div>
+
+<div id="putar" class="panel">
+  <button id="main" aria-label="mainkan / jeda">&#9654;</button>
+  <input id="garis-waktu" type="range" min="0" max="1000" value="0" aria-label="garis waktu">
+  <span id="jam">0.00 / 0.00s</span>
+  <select id="klip" aria-label="klip animasi"></select>
+</div>
+
+<div id="bantuan" class="panel">
+  <kbd>seret</kbd> putar · <kbd>gulir</kbd> zum · <kbd>klik</kbd> pilih · <kbd>spasi</kbd> main
+</div>
+
+<div id="muat">memuat adegan…</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+    "rapier": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.20.0/dist/rapier.mjs"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const ADEGAN = /*__ADEGAN__*/ null;
+
+/* ── Aset datang sebagai base64, BUKAN sebagai URL ───────────────────────
+   Halaman terbit berjalan di bawah CSP yang memblokir pengambilan dari host
+   mana pun kecuali CDN skrip. `loader.load(url)` memakai fetch() di dalam,
+   jadi ia gagal tanpa pesan yang menyebut sebabnya — layar tinggal kosong.
+   Bita-nya diurai di sini, lalu `loader.parse()` dipanggil langsung: tidak
+   ada permintaan jaringan sama sekali. */
+function keBita(b64) {
+  const s = atob(b64);
+  const buf = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) buf[i] = s.charCodeAt(i);
+  return buf.buffer;
+}
+
+const el = (id) => document.getElementById(id);
+const warna = (h) => new THREE.Color(h ?? '#ffffff');
+
+/* ── Penyiapan ──────────────────────────────────────────────────────── */
+const panggung = el('panggung');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = ADEGAN.lingkungan?.paparan ?? 1;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = ADEGAN.lingkungan?.bayangan !== false;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+panggung.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+
+/* Latar gradien vertikal. Dibuat sebagai tekstur 2×N, bukan shader penuh:
+   dua warna sudah cukup, dan tekstur kecil tidak menambah satu pun program
+   GLSL yang harus dikompilasi saat halaman pertama dibuka. */
+function langit(atas, bawah) {
+  const c = document.createElement('canvas');
+  c.width = 2; c.height = 256;
+  const g = c.getContext('2d').createLinearGradient(0, 0, 0, 256);
+  g.addColorStop(0, atas); g.addColorStop(1, bawah);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 2, 256);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  return t;
+}
+scene.background = langit(
+  ADEGAN.lingkungan?.langit_atas ?? '#dfe9f5',
+  ADEGAN.lingkungan?.langit_bawah ?? '#2a3140');
+
+/* Lingkungan IBL dari RoomEnvironment: pantulan yang masuk akal tanpa satu
+   berkas HDR pun — dan berkas HDR memang tidak bisa diambil di sini. */
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+if (ADEGAN.lingkungan?.kabut) {
+  const k = ADEGAN.lingkungan.kabut;
+  scene.fog = new THREE.Fog(warna(k.warna), k.dekat, k.jauh);
+}
+
+const kam = ADEGAN.kamera ?? {};
+const camera = new THREE.PerspectiveCamera(
+  kam.fov ?? 40, innerWidth / innerHeight, kam.dekat ?? 0.01, kam.jauh ?? 2000);
+camera.position.set(...(kam.posisi ?? [4, 3, 6]));
+
+const kontrol = new OrbitControls(camera, renderer.domElement);
+kontrol.target.set(...(kam.target ?? [0, 1, 0]));
+kontrol.enableDamping = true;
+kontrol.dampingFactor = 0.06;
+kontrol.maxPolarAngle = Math.PI * 0.495;   // jangan menembus lantai
+kontrol.update();
+
+/* ── Cahaya ─────────────────────────────────────────────────────────── */
+for (const c of ADEGAN.cahaya ?? []) {
+  let L;
+  if (c.jenis === 'lingkungan') L = new THREE.AmbientLight(warna(c.warna), c.kuat);
+  else if (c.jenis === 'titik') L = new THREE.PointLight(warna(c.warna), c.kuat, 0, 2);
+  else if (c.jenis === 'sorot') L = new THREE.SpotLight(warna(c.warna), c.kuat, 0, Math.PI / 6, 0.4, 2);
+  else L = new THREE.DirectionalLight(warna(c.warna), c.kuat);
+  if (c.posisi && L.position) L.position.set(...c.posisi);
+  if (c.bayangan && L.shadow) {
+    L.castShadow = true;
+    L.shadow.mapSize.set(2048, 2048);
+    L.shadow.bias = -0.0008;
+    L.shadow.normalBias = 0.02;
+    if (L.shadow.camera.isOrthographicCamera) {
+      const s = 12;
+      Object.assign(L.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 0.1, far: 80 });
+      L.shadow.camera.updateProjectionMatrix();
+    }
+  }
+  scene.add(L);
+}
+
+/* ── Bentuk dasar ───────────────────────────────────────────────────── */
+const GEOM = {
+  kotak: (u) => new THREE.BoxGeometry(u[0], u[1], u[2]),
+  bola: (u) => new THREE.SphereGeometry(u[0] / 2, 48, 32),
+  bidang: (u) => new THREE.PlaneGeometry(u[0], u[2]).rotateX(-Math.PI / 2),
+  silinder: (u) => new THREE.CylinderGeometry(u[0] / 2, u[0] / 2, u[1], 48),
+  torus: (u) => new THREE.TorusGeometry(u[0] / 2, u[1] / 2, 24, 64),
+  kapsul: (u) => new THREE.CapsuleGeometry(u[0] / 2, u[1], 12, 32),
+};
+
+function bahanDari(b) {
+  const m = new THREE.MeshPhysicalMaterial({
+    color: warna(b?.warna ?? '#c8cdd6'),
+    roughness: b?.kekasaran ?? 0.55,
+    metalness: b?.logam ?? 0.0,
+  });
+  if (b?.pancar) m.emissive = warna(b.warna_pancar ?? b.warna ?? '#ffffff').multiplyScalar(b.pancar);
+  if (b?.bening) { m.transmission = b.bening; m.thickness = 1; m.ior = 1.45; }
+  if (b?.tembus != null && b.tembus < 1) { m.transparent = true; m.opacity = b.tembus; }
+  return m;
+}
+
+/* ── Susun node ─────────────────────────────────────────────────────── */
+const loader = new GLTFLoader();
+const daftar = new Map();   // objek3D -> catatan node
+const mixers = [];
+const semuaKlip = [];
+let segitigaTotal = 0;
+
+function pasang(obj, n, stat) {
+  obj.name = n.nama ?? n.id;
+  obj.position.set(...n.posisi);
+  obj.rotation.set(...n.putar.map((d) => d * Math.PI / 180));
+  obj.scale.set(...n.skala);
+  obj.visible = n.tampak !== false;
+  obj.traverse((o) => {
+    if (!o.isMesh) return;
+    o.castShadow = n.bayangan !== false;
+    o.receiveShadow = true;
+  });
+  scene.add(obj);
+  const kotak = new THREE.Box3().setFromObject(obj);
+  const uk = kotak.getSize(new THREE.Vector3());
+  daftar.set(obj, { node: n, ...stat, ukuran: [uk.x, uk.y, uk.z] });
+  return obj;
+}
+
+function hitungSegitiga(obj) {
+  let t = 0;
+  obj.traverse((o) => {
+    if (!o.isMesh || !o.geometry) return;
+    const g = o.geometry;
+    t += g.index ? g.index.count / 3 : (g.attributes.position?.count ?? 0) / 3;
+  });
+  return Math.round(t);
+}
+
+async function bangun() {
+  for (const n of ADEGAN.node ?? []) {
+    if (n.jenis === 'aset') {
+      const a = ADEGAN.aset[n.aset];
+      const gltf = await loader.parseAsync(keBita(a.b64), '');
+      const akar = gltf.scene;
+      /* Klip animasi dikumpulkan di sini, SEBELUM bahan node menimpa apa pun:
+         `parseAsync` mengembalikan klip yang menunjuk node di dalam gltf.scene,
+         jadi mixer-nya harus dipasang pada akar yang sama persis. */
+      if (gltf.animations?.length) {
+        const mixer = new THREE.AnimationMixer(akar);
+        for (const klip of gltf.animations) {
+          semuaKlip.push({ nama: klip.name || `klip ${semuaKlip.length + 1}`,
+            aksi: mixer.clipAction(klip), durasi: klip.duration, aset: n.aset });
+        }
+        mixers.push(mixer);
+      }
+      /* Bahan node MENAMBAL bahan GLB, tidak menggantinya.
+       *
+       * Versi pertama mengganti seluruh material dengan `bahanDari(n.bahan)`.
+       * Pada aset tanpa tekstur itu tidak apa-apa. Pada aset BERTEKSTUR itu
+       * membuang seluruh peta yang baru dipanggang — albedo, kekasaran,
+       * normal — dan menggantinya dengan satu warna rata. Tidak ada galat;
+       * yang terlihat cuma benda yang tiba-tiba polos, dan mudah dikira
+       * teksturnya memang gagal dibuat.
+       *
+       * Sekarang hanya properti yang DISEBUT yang ditimpa, dan peta
+       * teksturnya dipertahankan. */
+      if (n.bahan) {
+        akar.traverse((o) => {
+          if (!o.isMesh || !o.material) return;
+          const bahan = Array.isArray(o.material) ? o.material : [o.material];
+          for (const m of bahan) {
+            const b = n.bahan;
+            if (b.warna != null && !m.map) m.color = warna(b.warna);
+            if (b.kekasaran != null && !m.roughnessMap) m.roughness = b.kekasaran;
+            if (b.logam != null && !m.metalnessMap) m.metalness = b.logam;
+            if (b.pancar) m.emissive = warna(b.warna_pancar ?? b.warna ?? '#ffffff')
+              .multiplyScalar(b.pancar);
+            if (b.bening) { m.transmission = b.bening; m.thickness = 1; m.ior = 1.45; }
+            if (b.tembus != null && b.tembus < 1) { m.transparent = true; m.opacity = b.tembus; }
+            m.needsUpdate = true;
+          }
+        });
+      }
+      pasang(akar, n, { segitiga: hitungSegitiga(akar), aset: n.aset, sertifikat: a.sertifikat });
+    } else {
+      const g = (GEOM[n.jenis] ?? GEOM.kotak)(n.ukuran ?? [1, 1, 1]);
+      const mesh = new THREE.Mesh(g, bahanDari(n.bahan));
+      pasang(mesh, n, { segitiga: hitungSegitiga(mesh) });
+    }
+  }
+  for (const c of daftar.values()) segitigaTotal += c.segitiga ?? 0;
+}
+
+/* ── Pemilihan ──────────────────────────────────────────────────────── */
+const sinar = new THREE.Raycaster();
+const tetikus = new THREE.Vector2();
+let sorot = null;
+let terpilih = null;
+
+function akarNode(o) {
+  while (o && !daftar.has(o)) o = o.parent;
+  return o ?? null;
+}
+
+function pilih(obj) {
+  if (sorot) { scene.remove(sorot); sorot.dispose?.(); sorot = null; }
+  terpilih = obj;
+  const p = el('pilihan');
+  if (!obj) { p.classList.remove('tampak'); return; }
+
+  sorot = new THREE.BoxHelper(obj, 0x5eead4);
+  sorot.material.depthTest = false;
+  sorot.material.transparent = true;
+  scene.add(sorot);
+
+  const c = daftar.get(obj);
+  el('pilih-nama').textContent = c.node.nama ?? c.node.id;
+  const baris = [
+    ['id', c.node.id],
+    ['jenis', c.node.jenis],
+    ...(c.aset ? [['aset', c.aset]] : []),
+    ['segitiga', c.segitiga.toLocaleString('id-ID')],
+    ['posisi', c.node.posisi.map((x) => x.toFixed(2)).join(', ')],
+    ['ukuran', c.ukuran.map((x) => x.toFixed(3)).join(' × ')],
+    ['skala', c.node.skala.map((x) => x.toFixed(2)).join(', ')],
+  ];
+  el('pilih-isi').innerHTML = baris
+    .map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+
+  const s = c.sertifikat;
+  el('sertifikat').innerHTML = s
+    ? `<span class="lencana ${s.lulus ? 'lulus' : 'gagal'}">`
+      + `${s.lulus ? 'LULUS' : `GAGAL ${s.gagal}`}</span>`
+      + ` <span style="color:var(--redup);font-family:var(--mono);font-size:10.5px">`
+      + `${s.spek}</span>`
+      + `<div style="color:var(--redup);font-size:10.5px;margin-top:5px">`
+      + `${s.diperiksa} aturan diperiksa`
+      + `${s.peringatan ? ` · ${s.peringatan} peringatan` : ''}</div>`
+    : `<span style="color:var(--redup);font-size:11px">aset ini tidak membawa sertifikat</span>`;
+  p.classList.add('tampak');
+}
+
+renderer.domElement.addEventListener('pointerdown', (e) => { tetikus.set(e.clientX, e.clientY); });
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (Math.hypot(e.clientX - tetikus.x, e.clientY - tetikus.y) > 5) return;  // itu seretan
+  const r = renderer.domElement.getBoundingClientRect();
+  sinar.setFromCamera(new THREE.Vector2(
+    ((e.clientX - r.left) / r.width) * 2 - 1,
+    -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+  const kena = sinar.intersectObjects([...daftar.keys()], true);
+  pilih(kena.length ? akarNode(kena[0].object) : null);
+});
+el('tutup').onclick = () => pilih(null);
+addEventListener('keydown', (e) => { if (e.key === 'Escape') pilih(null); });
+
+/* ── Fisika ──────────────────────────────────────────────────────────────
+ *
+ * Rapier dimuat MALAS: hanya kalau ada node yang menyebut `fisika`. Berkasnya
+ * 2 MB, dan halaman yang menariknya untuk adegan diam membayar dua megabita
+ * demi tidak ada apa-apa.
+ *
+ * Satu batas yang dinyatakan, bukan dibiarkan jadi kejutan: sebuah node
+ * boleh DIANIMASIKAN atau DIKENDALIKAN FISIKA, tidak keduanya. Keduanya
+ * menulis transform yang sama tiap bingkai, dan yang menang adalah yang
+ * kebetulan berjalan belakangan — hasilnya bergantung pada urutan kode, dan
+ * itu bentuk bug yang paling sulit dilacak.
+ */
+let fisikaDunia = null;
+let R_GLOBAL = null;
+let fisikaBadan = [];
+let fisikaJalan = false;
+const posisiAwal = new Map();
+
+function bentukCollider(R, f, u) {
+  const bentuk = f.bentuk ?? 'kotak';
+  if (bentuk === 'cembung') {
+    /* Titiknya datang dari adegan, sudah diukur di Node. Kalau hull-nya
+       gagal di sini, JANGAN diam-diam turun ke kotak: collider yang berbeda
+       dari yang diukur membuat seluruh angkanya bohong. */
+    const cd = R.ColliderDesc.convexHull(new Float32Array(f.titik));
+    if (!cd) throw new Error('convexHull gagal untuk titik yang tersimpan di adegan');
+    return cd;
+  }
+  if (bentuk === 'bola') return R.ColliderDesc.ball(u[0] / 2);
+  if (bentuk === 'kapsul') return R.ColliderDesc.capsule(Math.max(u[1] / 2 - u[0] / 2, 1e-6), u[0] / 2);
+  if (bentuk === 'silinder') return R.ColliderDesc.cylinder(u[1] / 2, u[0] / 2);
+  return R.ColliderDesc.cuboid(u[0] / 2, u[1] / 2, u[2] / 2);
+}
+
+/* ── Kendali pemain ──────────────────────────────────────────────────────
+ *
+ * Isinya DISUNTIKKAN dari `karakter.mjs` saat terbit, bukan disalin.
+ *
+ * Versi pertama menyalin logikanya ke sini. Salinan bisa menyimpang dari
+ * yang diuji, dan kalau ia menyimpang, 12 uji karakter yang hijau di Node
+ * tidak mengatakan apa pun tentang halaman yang benar-benar dikirim. Yang
+ * diuji harus yang dikirim.
+ */
+/*__KARAKTER__*/
+
+const tombol = new Set();
+let pemain = null;
+let sudutKamera = 0;
+
+function pasangPemain(entri, tinggi, jari) {
+  pemain = buatKarakterDari(fisikaDunia, R_GLOBAL, entri, { tinggi, jari });
+  addEventListener('keydown', (e) => {
+    tombol.add(e.code);
+    if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space'].includes(e.code)) e.preventDefault();
+  });
+  addEventListener('keyup', (e) => tombol.delete(e.code));
+  el('bantuan').innerHTML = '<kbd>WASD</kbd> jalan · <kbd>spasi</kbd> lompat · '
+    + '<kbd>Q</kbd><kbd>E</kbd> putar · <kbd>seret</kbd> kamera';
+}
+
+/** Bungkus badan yang SUDAH dibuat pasangFisika jadi karakter. */
+function buatKarakterDari(w, R, entri, { tinggi, jari }) {
+  const kendali = w.createCharacterController(0.02);
+  kendali.enableAutostep(0.35, 0.2, true);
+  kendali.enableSnapToGround(0.35);
+  kendali.setMaxSlopeClimbAngle((50 * Math.PI) / 180);
+  kendali.setMinSlopeSlideAngle((35 * Math.PI) / 180);
+  return {
+    d: { w, langkah: 1 / 60 },
+    kendali, badan: entri.badan, collider: entri.collider,
+    tinggi, jari, vY: 0, obj: entri.obj,
+  };
+}
+
+function langkahPemain(dt) {
+  if (!pemain || !fisikaJalan) return;
+  const d = Math.min(dt, 1 / 20);
+  if (tombol.has('KeyQ')) sudutKamera += 1.8 * d;
+  if (tombol.has('KeyE')) sudutKamera -= 1.8 * d;
+
+  let mx = 0;
+  let mz = 0;
+  if (tombol.has('KeyW')) mz -= 1;
+  if (tombol.has('KeyS')) mz += 1;
+  if (tombol.has('KeyA')) mx -= 1;
+  if (tombol.has('KeyD')) mx += 1;
+  const c = Math.cos(sudutKamera);
+  const sn = Math.sin(sudutKamera);
+
+  /* Langkah karakternya dari modul yang diuji; yang di sini cuma memutar
+     masukannya ke arah kamera dan menggerakkan kameranya. `langkahKarakter`
+     memanggil `w.step()` sendiri, jadi `langkahFisika` TIDAK boleh
+     memanggilnya lagi saat ada pemain. */
+  langkahKarakter(pemain, {
+    dt, arah: [mx * c - mz * sn, mx * sn + mz * c], lompat: tombol.has('Space'),
+  });
+
+  const t = pemain.badan.translation();
+  pemain.obj.position.set(t.x, t.y, t.z);
+  kontrol.target.set(t.x, t.y + pemain.tinggi * 0.35, t.z);
+  camera.position.set(
+    t.x + Math.sin(sudutKamera) * 6.5, t.y + 3.4, t.z + Math.cos(sudutKamera) * 6.5);
+}
+
+async function pasangFisika() {
+  const berfisika = (ADEGAN.node ?? []).filter((n) => n.fisika);
+  if (!berfisika.length) return;
+
+  /* Jalurnya `dist/rapier.mjs` dan versinya DIPATOK, bukan wildcard.
+     Percobaan pertama memakai `rapier.es.js` — jalur yang benar untuk 0.14.x
+     dan 404 di 0.20.0, yang memindahkan berkasnya ke dist/. Saya
+     memverifikasi URL untuk versi yang BERBEDA dari yang saya pasang, dan
+     halamannya macet di "memuat adegan..." tanpa satu pun tanda di layar.
+
+     Varian `-compat` dipilih karena ia MENANAM WASM-nya sebagai base64
+     (magic `AGFzbQ` ada di dalam berkasnya). Varian biasa mengambil .wasm
+     lewat fetch terpisah, dan fetch apa pun diblokir di halaman terbit. */
+  const RAPIER = await import('rapier');
+  const R = RAPIER.default ?? RAPIER;
+  R_GLOBAL = R;
+  await R.init();
+  const g = ADEGAN.fisika?.gravitasi ?? [0, -9.81, 0];
+  fisikaDunia = new R.World({ x: g[0], y: g[1], z: g[2] });
+
+  for (const n of berfisika) {
+    const obj = [...daftar.keys()].find((o) => daftar.get(o).node.id === n.id);
+    if (!obj) continue;
+    const f = n.fisika;
+    /* Ukuran collider: yang DINYATAKAN kalau ada, kalau tidak kotak batas
+       objek yang benar-benar dirender. Memakai `ukuran` node saja akan salah
+       untuk aset, yang ukurannya datang dari GLB-nya. */
+    const c = daftar.get(obj);
+    const u = f.ukuran ?? c.ukuran ?? [1, 1, 1];
+
+    const desc = f.jenis === 'statis' ? R.RigidBodyDesc.fixed()
+      : f.jenis === 'kinematik' ? R.RigidBodyDesc.kinematicPositionBased()
+        : R.RigidBodyDesc.dynamic();
+    desc.setTranslation(obj.position.x, obj.position.y, obj.position.z);
+    desc.setRotation({
+      x: obj.quaternion.x, y: obj.quaternion.y, z: obj.quaternion.z, w: obj.quaternion.w,
+    });
+    const badan = fisikaDunia.createRigidBody(desc);
+
+    const cd = bentukCollider(R, f, u);
+    cd.setFriction(f.gesekan ?? 0.5).setRestitution(f.pantul ?? 0);
+    if (f.massa != null) cd.setMass(f.massa);
+    else if (f.kerapatan != null) cd.setDensity(f.kerapatan);
+    /* Collidernya diambil dari NILAI KEMBALI createCollider, bukan dari
+       `colliders.getAll().at(-1)`. Versi pertama memakai yang terakhir itu
+       — urutannya tidak dijamin, dan `computeColliderMovement` pada
+       collider yang salah tidak melempar: ia cuma menghitung gerakan untuk
+       benda lain, dan pemainnya diam di tempat tanpa satu pun galat. */
+    const collider = fisikaDunia.createCollider(cd, badan);
+
+    const entri = { obj, badan, collider, jenis: f.jenis };
+    fisikaBadan.push(entri);
+    if (f.kendali) {
+      entri.ikutKamera = true;
+      pasangPemain(entri, u[1], u[0] / 2);
+    }
+    posisiAwal.set(obj, {
+      p: obj.position.clone(), q: obj.quaternion.clone(),
+    });
+  }
+
+  el('fisika').classList.add('tampak');
+  el('pilihan').classList.add('dengan-fisika');
+  const dinamis = fisikaBadan.filter((b) => b.jenis === 'dinamis').length;
+  el('fisika-angka').textContent = `${fisikaBadan.length} badan · ${dinamis} dinamis`;
+  el('fisika-main').onclick = () => setFisika(!fisikaJalan);
+  el('fisika-ulang').onclick = () => ulangFisika();
+}
+
+function setFisika(nyala) {
+  fisikaJalan = nyala;
+  el('fisika-main').innerHTML = nyala ? '&#10073;&#10073; fisika' : '&#9654; fisika';
+}
+
+function ulangFisika() {
+  setFisika(false);
+  for (const b of fisikaBadan) {
+    const a = posisiAwal.get(b.obj);
+    if (!a) continue;
+    b.obj.position.copy(a.p);
+    b.obj.quaternion.copy(a.q);
+    b.badan.setTranslation({ x: a.p.x, y: a.p.y, z: a.p.z }, true);
+    b.badan.setRotation({ x: a.q.x, y: a.q.y, z: a.q.z, w: a.q.w }, true);
+    b.badan.setLinvel({ x: 0, y: 0, z: 0 }, true);
+    b.badan.setAngvel({ x: 0, y: 0, z: 0 }, true);
+  }
+}
+
+function langkahFisika(dt) {
+  if (!fisikaJalan || !fisikaDunia) return;
+  if (pemain) langkahPemain(dt);       // ia yang memanggil step()
+  else fisikaDunia.step();
+  for (const b of fisikaBadan) {
+    if (b.jenis === 'statis') continue;
+    const t = b.badan.translation();
+    const q = b.badan.rotation();
+    b.obj.position.set(t.x, t.y, t.z);
+    b.obj.quaternion.set(q.x, q.y, q.z, q.w);
+  }
+}
+
+/* ── Pemutar animasi ────────────────────────────────────────────────────
+ *
+ * Bilahnya hanya muncul kalau ADA klip. Itu disengaja: bilah pemutar yang
+ * tampil pada aset diam adalah janji yang tidak ditepati — orang menekan
+ * play dan tidak terjadi apa-apa, lalu menyimpulkan halamannya rusak.
+ *
+ * Sebaliknya, ketiadaan animasi tidak boleh SENYAP juga: panel angka
+ * menyebutnya, jadi "aset ini memang diam" bisa dibedakan dari "pemutarnya
+ * yang tidak jalan". Terukur: takora-siap.glb terbit dengan 0 animasi
+ * sesudah 96 bingkai dianimasikan di Blender, dan tidak ada satu pun tanda
+ * di halaman yang menunjukkan animasinya hilang. */
+const jam = new THREE.Clock();
+let bermain = false;
+let klipAktif = null;
+
+/* ── Semua klip main BERSAMAAN, bukan satu per satu ──────────────────────
+ *
+ * Blender mengekspor tiap objek beranimasi sebagai glTF animation TERSENDIRI:
+ * Takora keluar sebagai 5 klip — badan, dua kelopak, lidah, otak — bukan
+ * satu klip "idle".
+ *
+ * Pemutar yang memainkan satu klip pada satu waktu akan menggerakkan SATU
+ * objek dan mendiamkan sisanya. Hasilnya kelihatan seperti animasi yang
+ * rusak, padahal berkasnya benar dan lengkap. Yang salah pemutarnya.
+ *
+ * Jadi bawaannya SERENTAK. Klip tunggal tetap bisa dipilih untuk memeriksa
+ * satu gerakan — itu berguna saat mencari mana yang salah — tetapi ia bukan
+ * bawaan, karena bawaan yang menyesatkan lebih mahal daripada bawaan yang
+ * kurang fleksibel. */
+const SERENTAK = -1;
+
+function pilihKlip(i) {
+  for (const k of semuaKlip) k.aksi.stop();
+  const dipilih = i === SERENTAK ? semuaKlip : [semuaKlip[i]].filter(Boolean);
+  for (const k of dipilih) { k.aksi.reset(); k.aksi.play(); k.aksi.paused = !bermain; }
+  /* Klip terpanjang jadi acuan garis waktu — memakai yang pertama akan
+     membuat penggeser mentok sebelum gerakan lain selesai. */
+  klipAktif = dipilih.reduce((a, k) => (a && a.durasi >= k.durasi ? a : k), null);
+  main_semua = dipilih;
+}
+let main_semua = [];
+
+function setMain(nyala) {
+  bermain = nyala;
+  el('main').innerHTML = nyala ? '&#10073;&#10073;' : '&#9654;';
+  for (const k of main_semua) k.aksi.paused = !nyala;
+}
+
+function pasangPemutar() {
+  if (!semuaKlip.length) return;
+  el('putar').classList.add('tampak');
+  /* Nama klip Blender berbentuk "lidahAction.001" — ekor teknis yang tidak
+     memberi tahu pembaca apa pun. Dirapikan untuk dibaca, TIDAK diubah di
+     berkasnya: nama aslinya tetap yang dipakai kalau ada yang menelusuri. */
+  const rapi = (n) => n.replace(/Action(\.\d+)?$/, '').replace(/[_-]/g, ' ').trim() || n;
+  el('klip').innerHTML = [`<option value="${SERENTAK}">semua (${semuaKlip.length})</option>`]
+    .concat(semuaKlip.map((k, i) => `<option value="${i}">${rapi(k.nama)}</option>`))
+    .join('');
+  el('klip').style.display = semuaKlip.length > 1 ? '' : 'none';
+  el('klip').onchange = (e) => pilihKlip(Number(e.target.value));
+  el('main').onclick = () => setMain(!bermain);
+  el('garis-waktu').oninput = (e) => {
+    if (!klipAktif) return;
+    const t = (Number(e.target.value) / 1000) * klipAktif.durasi;
+    /* Waktu disetel pada SEMUA klip yang sedang main, bukan cuma yang jadi
+       acuan garis waktu — kalau tidak, menggeser akan memisahkan gerakan
+       kelopak dari gerakan badannya. */
+    for (const k of main_semua) k.aksi.time = Math.min(t, k.durasi);
+    /* Satu langkah nol detik memaksa mixer menulis pose itu ke adegan;
+       tanpa ini penggeser bergerak dan modelnya tidak. */
+    mixers.forEach((m) => m.update(0));
+  };
+  addEventListener('keydown', (e) => {
+    /* Spasi diserahkan ke pemain kalau ada kendali karakter. Versi pertama
+       memasang keduanya, jadi satu tekan melompat DAN menjeda animasi —
+       dan yang terlihat cuma animasinya berhenti. */
+    if (e.code === 'Space' && !pemain) { e.preventDefault(); setMain(!bermain); }
+  });
+  pilihKlip(SERENTAK);
+  setMain(!matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+/* ── Jalan ──────────────────────────────────────────────────────────── */
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+function gambar() {
+  requestAnimationFrame(gambar);
+  const dt = jam.getDelta();
+  langkahFisika(dt);
+  if (bermain && mixers.length) mixers.forEach((m) => m.update(dt));
+  if (klipAktif) {
+    const t = klipAktif.aksi.time;
+    el('garis-waktu').value = Math.round((t / klipAktif.durasi) * 1000);
+    el('jam').textContent = `${t.toFixed(2)} / ${klipAktif.durasi.toFixed(2)}s`;
+  }
+  kontrol.update();
+  if (sorot && terpilih) sorot.update();
+  renderer.render(scene, camera);
+}
+
+await bangun();
+
+el('judul').textContent = ADEGAN.nama ?? 'adegan';
+el('subjudul').textContent = `${ADEGAN.node.length} node · `
+  + `${Object.keys(ADEGAN.aset).length} aset · Rupa3D`;
+el('angka').innerHTML = [
+  ['node', ADEGAN.node.length],
+  ['segitiga', segitigaTotal.toLocaleString('id-ID')],
+  ['cahaya', ADEGAN.cahaya.length],
+  ['aset', Object.keys(ADEGAN.aset).length],
+  ['animasi', semuaKlip.length],
+  ['fisika', (ADEGAN.node ?? []).filter((n) => n.fisika).length],
+].map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+
+pasangPemutar();
+await pasangFisika();
+
+/* Pegangan pemeriksaan. Modul ES tidak mengekspos lingkupnya, jadi tanpa ini
+   satu-satunya cara mengetahui keadaan runtime adalah menebak dari layar —
+   dan layar tidak membedakan "fisika mati" dari "fisika jalan tetapi tidak
+   tersinkron". Dipakai juga oleh editor nanti. */
+window.__rupa = {
+  scene, camera, renderer, kontrol,
+  node: () => [...daftar.entries()].map(([o, c]) => ({
+    id: c.node.id, posisi: o.position.toArray(), segitiga: c.segitiga,
+  })),
+  fisika: () => ({
+    dunia: Boolean(fisikaDunia),
+    jalan: fisikaJalan,
+    badan: fisikaBadan.length,
+    gravitasi: fisikaDunia ? fisikaDunia.gravity : null,
+    contoh: fisikaBadan.slice(0, 3).map((b) => ({
+      id: daftar.get(b.obj)?.node.id, jenis: b.jenis,
+      obj_y: Number(b.obj.position.y.toFixed(4)),
+      badan_y: Number(b.badan.translation().y.toFixed(4)),
+      tidur: b.badan.isSleeping?.() ?? null,
+    })),
+  }),
+  langkah: () => { fisikaDunia?.step(); },
+  pemain: () => (pemain ? {
+    ada: true, kendali: Boolean(pemain.kendali), collider: Boolean(pemain.collider),
+    posisi: pemain.badan.translation(), vY: Number(pemain.vY.toFixed(3)),
+    menapak: pemain.kendali?.computedGrounded?.() ?? null,
+    tombol: [...tombol],
+  } : { ada: false }),
+  /* Pintu uji. `requestAnimationFrame` menyala NOL kali per detik saat
+     tabnya tidak dilukis, jadi tanpa ini halaman yang benar SELALU terlihat
+     beku dari alat otomatis — dan itu sudah menyesatkan saya berkali-kali.
+     Ia memanggil jalur yang sama dengan loop render, bukan jalur pintas. */
+  langkahPemainUji: (dt = 1 / 60) => { langkahPemain(dt); },
+  klip: () => semuaKlip.map((k) => ({ nama: k.nama, durasi: k.durasi })),
+};
+
+el('muat').classList.add('pergi');
+setTimeout(() => el('muat').remove(), 600);
+gambar();
+</script>

@@ -1,0 +1,23 @@
+# Semua ruang kerja uji — pola, bukan daftar: yang berikutnya
+# tidak boleh lolos gara-gara namanya belum sempat ditulis di sini.
+*.blend1
+*.pyc
+.rupa3d/
+.uji-*/
+.uji-cli/
+.uji-draco/
+.uji-mcp/
+.uji-ruang/
+.uji-silang/
+.uji-sumber/
+.uji/
+__pycache__/
+node_modules/
+
+# Rilis: tarball npm dan alat terbit registri — bukan sumber, dan versi
+# lama mcp-publisher menulis tokennya ke direktori kerja.
+rupa3d-*.tgz
+mcp-publisher
+mcp-publisher.exe
+mcp-publisher.tar.gz
+.mcpregistry_*

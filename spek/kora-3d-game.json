@@ -1,0 +1,8 @@
+{
+  "nama": "kora-3d-game",
+  "versi": "1.0",
+  "keterangan": "Kora Character 3D yang juga harus lolos pipeline siap-game. Mewarisi kontrak BENTUK dari kora-3d dan kontrak PIPELINE dari game-siap; tidak menyalin satu aturan pun, supaya keduanya tidak menyimpang diam-diam.",
+  "satuan": "cm",
+  "warisi": ["kora-3d.json", "game-siap.json"],
+  "aturan": []
+}

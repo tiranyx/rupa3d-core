@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Ikon contoh untuk contoh/svg-ke-3d.mjs: rumah bergaya garis.
+       Sengaja memuat KEDUA jenis path yang diperlakukan berbeda saat impor:
+       path tertutup ber-fill (dinding, pintu, jendela) jadi lempeng padat, dan
+       path terbuka ber-stroke (atap, asap) jadi tabung. stroke-width 3 pada
+       viewBox 64, sama dengan yang dihitung di contohnya.
+       Dibuat untuk repo ini; berlisensi sama dengan repo (MIT). -->
+  <g fill="none" stroke="#1C2B24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 30L32 10l24 20"/>
+    <path d="M14 28v26h36V28"/>
+    <path d="M27 54V40h10v14z" fill="#A86B38"/>
+    <path d="M18 34h7v7h-7z" fill="#F7F4E8"/>
+    <path d="M39 34h7v7h-7z" fill="#F7F4E8"/>
+    <path d="M44 16v-6"/>
+    <path d="M49 13l3-4"/>
+  </g>
+</svg>

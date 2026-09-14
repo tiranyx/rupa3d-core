@@ -1,0 +1,7 @@
+{
+  "nama": "kora-3d-lengkap",
+  "versi": "1.0",
+  "warisi": ["kora-3d-game.json", "topologi-siap.json"],
+  "catatan": "Bentuk + pipeline + topologi. Ini spek terlengkap yang bisa ditulis alat ini hari ini.",
+  "aturan": []
+}

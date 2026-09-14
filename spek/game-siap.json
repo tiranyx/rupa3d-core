@@ -1,0 +1,49 @@
+{
+  "nama": "game-siap",
+  "versi": "1.0",
+  "keterangan": "Kontrak PIPELINE, bukan bentuk. Menilai apa yang dihasilkan LOD, proksi tabrakan, dan baking — bukan asetnya sendiri. Dipakai lewat `warisi` bersama spek bentuk.",
+  "aturan": [
+    {
+      "kode": "galat_lod_terburuk_persen",
+      "pembanding": "<=",
+      "nilai": 2.0,
+      "berat": "wajib",
+      "alasan": "Di atas 2% diagonal, siluetnya mulai terbaca berubah — dan siluet adalah satu-satunya hal yang tersisa dari sebuah objek di kejauhan, yaitu justru saat LOD terakhir dipakai."
+    },
+    {
+      "kode": "jumlah_lod",
+      "pembanding": ">=",
+      "nilai": 3,
+      "berat": "peringatan",
+      "alasan": "Rantai yang terlalu pendek memaksa lompatan besar antar tingkat, dan lompatan itu terlihat sebagai kedipan saat kamera bergerak."
+    },
+    {
+      "kode": "tabrakan_tembus_persen",
+      "pembanding": "<=",
+      "nilai": 5.0,
+      "berat": "wajib",
+      "alasan": "Permukaan asli yang berada DI LUAR proksi membuat benda menembus dinding. Ini cacat yang dirasakan pemain, bukan yang dilihat."
+    },
+    {
+      "kode": "tabrakan_longgar_persen",
+      "pembanding": "<=",
+      "nilai": 8.0,
+      "berat": "peringatan",
+      "alasan": "Proksi yang jauh di luar permukaan membuat tabrakan terasa di udara kosong. Lebih longgar ambangnya daripada tembus: menabrak udara mengganggu, menembus dinding merusak."
+    },
+    {
+      "kode": "tabrakan_dinamis",
+      "pembanding": "benar",
+      "nilai": true,
+      "berat": "wajib",
+      "alasan": "Proksi trimesh hanya sah untuk benda STATIS; sebagian besar mesin fisika, Rapier termasuk, tidak mendukung trimesh dinamis."
+    },
+    {
+      "kode": "tabrakan_segitiga",
+      "pembanding": "<=",
+      "nilai": 300,
+      "berat": "peringatan",
+      "alasan": "Mesin fisika ingin puluhan sampai ratusan segitiga, bukan ribuan. Hull mentah bisa 1.272; disederhanakan jadi 198 dengan galat nyaris tak berubah."
+    }
+  ]
+}

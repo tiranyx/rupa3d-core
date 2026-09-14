@@ -1,0 +1,71 @@
+{
+  "nama": "aset-generatif",
+  "versi": "1.0",
+  "sumbu_atas": "Y",
+  "warisi": ["topologi-siap.json", "tekstur-siap.json"],
+  "catatan": "Spek untuk aset yang DATANG DARI LUAR — keluaran generator, unduhan marketplace, kiriman vendor. Seluruh aturannya bisa dijawab dari BERKASNYA sendiri, tanpa Blender dan tanpa mengetahui bagaimana ia dibuat. Itu syarat yang mengikat: aturan yang menuntut riwayat pipeline (galat LOD, proksi tabrakan) sengaja TIDAK ADA di sini, karena sebuah GLB tidak mengangkut jawabannya dan aturan yang tidak bisa dinilai akan menggagalkan setiap berkas tanpa memberi tahu apa pun.",
+  "aturan": [
+    {
+      "kode": "skala_diterapkan",
+      "pembanding": "benar",
+      "nilai": true,
+      "berat": "wajib",
+      "alasan": "Skala yang masih tersimpan di node membuat benda tampil benar di satu pemuat dan salah di pemuat lain, dan merusak fisika serta bayangan. Ini keluhan produksi nomor satu untuk aset generatif, dan ia tidak pernah terlihat sebagai galat. Diukur dari skala DUNIA, jadi node berskala 1 di bawah induk berskala 40 tetap tertangkap."
+    },
+    {
+      "kode": "simpul_lepas",
+      "pembanding": "<=",
+      "nilai": 0,
+      "berat": "wajib",
+      "satuan": "verteks",
+      "alasan": "Verteks yang ada di accessor tetapi tidak dirujuk satu indeks pun. Ia dibayar penuh di VRAM dan tidak menggambar apa-apa. Yang membuatnya layak jadi aturan tersendiri: importir glTF Blender MEMBUANGNYA saat impor, jadi memeriksa lewat Blender akan selalu melaporkan nol. Terukur pada satu aset repo ini: berkas 4, Blender 0."
+    },
+    {
+      "kode": "objek_mesh",
+      "pembanding": ">=",
+      "nilai": 1,
+      "berat": "wajib",
+      "satuan": "objek",
+      "alasan": "Berkas tanpa satu mesh pun. Terdengar mustahil sampai sebuah ekspor gagal separuh jalan dan tetap menulis GLB yang sah — dan seluruh aturan lain pada berkas kosong akan lolos karena tidak ada yang melanggarnya."
+    },
+    {
+      "kode": "tinggi",
+      "pembanding": "antara",
+      "nilai": [0.001, 1000],
+      "berat": "peringatan",
+      "satuan": "satuan berkas",
+      "alasan": "Bukan ukuran yang benar — itu urusan spek proyek — melainkan ukuran yang MASUK AKAL. Aset di luar jangkauan ini hampir selalu salah satuan: milimeter dibaca sebagai meter, atau sebaliknya. Cacat skala adalah cacat adegan yang paling sering dan paling tidak kelihatan."
+    },
+    {
+      "kode": "topo_primitif_tanpa_uv",
+      "pembanding": "<=",
+      "nilai": 0,
+      "berat": "peringatan",
+      "satuan": "primitif",
+      "alasan": "Mesh tanpa UV tidak bisa diberi tekstur, dipanggangi, atau di-lightmap tanpa di-unwrap ulang dulu. Sah untuk aset yang memang berwarna rata; mahal kalau ketahuan belakangan."
+    },
+    {
+      "kode": "tex_gambar",
+      "pembanding": ">=",
+      "nilai": 1,
+      "berat": "peringatan",
+      "satuan": "gambar",
+      "alasan": "MENIMPA aturan wajib dari `tekstur-siap.json`. Di sana ia gerbang, karena spek itu memang menilai kesiapan TEKSTUR. Di sini aset bergeometri saja sepenuhnya sah, jadi ketiadaan tekstur cuma dilaporkan."
+    },
+    {
+      "kode": "tex_normal_sah",
+      "pembanding": "benar",
+      "nilai": true,
+      "berat": "peringatan",
+      "alasan": "MENIMPA aturan wajib dari `tekstur-siap.json`, dengan alasan yang sama: aset tanpa normal map sah, dan aturan ini cuma berarti kalau normal map-nya ADA."
+    },
+    {
+      "kode": "tex_peta_rata",
+      "pembanding": "<=",
+      "nilai": 0,
+      "berat": "peringatan",
+      "satuan": "peta",
+      "alasan": "MENIMPA aturan wajib dari `tekstur-siap.json`. Peta rata adalah pemborosan (1024 kuadrat berisi satu nilai = 4 MB VRAM untuk sebuah angka), bukan kerusakan — jadi ia peringatan pada aset yang datang dari luar."
+    }
+  ]
+}

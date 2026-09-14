@@ -1,0 +1,96 @@
+{
+  "nama": "tekstur-siap",
+  "versi": "1.0",
+  "catatan": "Ambang tekstur untuk aset produksi. Tiap baris menyebut apa yang rusak atau terbuang kalau dilanggar.",
+  "aturan": [
+    {
+      "kode": "tex_gambar",
+      "pembanding": ">=",
+      "nilai": 1,
+      "berat": "wajib",
+      "satuan": "gambar",
+      "alasan": "Aset tanpa satu gambar pun bukan aset bertekstur, dan spek ini tidak berlaku baginya. Aturan ini ada supaya sebabnya DISEBUT: sebelumnya aset tanpa tekstur ditolak lewat `tex_normal_sah`, yang mengirim pembacanya memperbaiki normal map yang tidak pernah ada."
+    },
+    {
+      "kode": "tex_px_per_meter_min",
+      "ukuran": "tex_piksel_per_meter_min",
+      "pembanding": ">=",
+      "nilai": 100,
+      "alasan": "Piksel per meter pada bagian yang paling renggang. Di bawah 100, benda seukuran manusia terlihat buram saat pemain mendekat. Angka ini tidak bisa dijawab resolusi sendirian - ia butuh kerapatan texel, dan itu butuh UV serta geometrinya.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "tex_px_per_meter_maks",
+      "ukuran": "tex_piksel_per_meter_maks",
+      "pembanding": "<=",
+      "nilai": 2000,
+      "alasan": "Di atas 2000 px/m hampir selalu pemborosan: teksturnya lebih tajam daripada yang bisa dilihat mata pada jarak main mana pun, dan VRAM-nya tetap dibayar penuh.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "tex_peta_rata",
+      "ukuran": "tex_peta_rata",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Peta yang seluruh pikselnya sama tidak membawa informasi apa pun. Satu peta 1024 kali 1024 memakan 4 MB VRAM untuk sebuah angka yang cukup ditulis sebagai faktor material.",
+      "berat": "wajib"
+    },
+    {
+      "kode": "tex_slot_bertentangan",
+      "ukuran": "tex_slot_bertentangan",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Satu gambar dipakai di dua slot yang ruang warnanya berbeda - albedo sRGB dan normal linear tidak mungkin gambar yang sama. Salah satunya pasti dibaca salah, dan itu tidak menghasilkan galat, cuma bayangan yang keliru.",
+      "berat": "wajib"
+    },
+    {
+      "kode": "tex_normal_sah",
+      "ukuran": "tex_normal_sah",
+      "pembanding": "benar",
+      "nilai": true,
+      "alasan": "Normal map harus memenuhi dua syarat sekaligus: panjang vektor mendekati 1 sesudah didekode, DAN saluran biru tinggi. Syarat pertama sendirian tidak cukup - gambar gradien sembarang memberi panjang 1,105, cukup dekat untuk lolos.",
+      "berat": "wajib"
+    },
+    {
+      "kode": "tex_kemungkinan_upscale",
+      "ukuran": "tex_kemungkinan_upscale",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Gambar yang bisa diturunkan separuh lalu dinaikkan lagi tanpa kehilangan apa pun adalah gambar yang di-upscale. Ia menempati memori empat kali lipat untuk detail yang sama persis.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "tex_alfa_sia_sia",
+      "ukuran": "tex_alfa_sia_sia",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Gambar RGBA yang alfanya 255 di mana-mana membuang seperempat memorinya. Peringatan, bukan gerbang: sebagian eksportir memang selalu menulis RGBA.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "tex_bukan_pot",
+      "ukuran": "tex_bukan_pot",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Ukuran bukan pangkat dua membatasi mipmap dan sebagian format kompresi GPU.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "tex_vram_berlaku",
+      "ukuran": "tex_vram_berlaku",
+      "pembanding": "<=",
+      "nilai": 16777216,
+      "berat": "peringatan",
+      "satuan": "bita",
+      "alasan": "VRAM yang BENAR-BENAR dibayar: BC7 kalau seluruh teksturnya KTX2, mentah kalau tidak. Menuliskan ambang terhadap angka mentah saja akan menolak aset ber-KTX2 yang sebenarnya empat kali lebih ringan - asumsi yang tidak dinyatakan menjadi gerbang yang salah."
+    },
+    {
+      "kode": "tex_terkompres_gpu",
+      "ukuran": "tex_terkompres_gpu",
+      "pembanding": "benar",
+      "nilai": true,
+      "berat": "peringatan",
+      "alasan": "Seluruh tekstur sudah terkompres GPU (KTX2/Basis Universal). Tekstur PNG mentah menempati VRAM empat sampai delapan kali lipat: 4,00 MB terhadap 0,50 MB untuk tiga peta 512 kali 512. Peringatan, bukan gerbang - KTX2 menuntut alat transcode yang belum tentu ada di setiap alur."
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "nama": "kora-3d",
+  "versi": "1.0",
+  "keterangan": "Spek aset Kora Character 3D v1.0, ditranskrip dari lembar Design & Modeling Guide yang diberikan Fahmi 6 Sep 2026. Angka di sini yang berlaku — gambarnya tidak bisa diperiksa skrip.",
+  "satuan": "cm",
+  "sumbu_atas": "Z",
+  "peta_bagian": {
+    "shell": [
+      "tempurung",
+      "shell",
+      "bibir"
+    ],
+    "inner": [
+      "daging",
+      "inner",
+      "busur"
+    ],
+    "brain": [
+      "otak",
+      "brain"
+    ],
+    "glass": [
+      "kubah",
+      "glass",
+      "dome"
+    ],
+    "liquid": [
+      "cairan",
+      "liquid",
+      "permukaan",
+      "gelembung",
+      "bubble"
+    ],
+    "face": [
+      "wajah",
+      "face",
+      "lidah",
+      "tongue",
+      "mata",
+      "eye"
+    ]
+  },
+  "aturan": [
+    {
+      "kode": "segitiga_total",
+      "pembanding": "antara",
+      "nilai": [
+        10000,
+        20000
+      ],
+      "berat": "wajib",
+      "alasan": "Poly Target 10K-20K di lembar spek. Batas bawah sama pentingnya: di bawah 10K bentuknya tidak akan sanggup membawa detail yang diminta."
+    },
+    {
+      "kode": "tinggi",
+      "pembanding": "=",
+      "nilai": 12.0,
+      "toleransi": 0.15,
+      "satuan": "cm",
+      "berat": "wajib",
+      "alasan": "120 mm, dengan 1 unit = 1 cm."
+    },
+    {
+      "kode": "lebar",
+      "pembanding": "=",
+      "nilai": 14.0,
+      "toleransi": 0.15,
+      "satuan": "cm",
+      "berat": "wajib",
+      "alasan": "140 mm."
+    },
+    {
+      "kode": "nisbah_lebar_tinggi",
+      "pembanding": "=",
+      "nilai": 1.1667,
+      "toleransi": 0.03,
+      "berat": "wajib",
+      "alasan": "140:120. Diperiksa terpisah dari lebar dan tinggi: aset yang diskalakan seragam akan lolos dua aturan pertama sekaligus salah, sedangkan nisbah menangkapnya."
+    },
+    {
+      "kode": "pivot_z",
+      "pembanding": "=",
+      "nilai": 0,
+      "toleransi": 0.02,
+      "satuan": "cm",
+      "berat": "wajib",
+      "alasan": "Pivot at center of base — dasar benda harus duduk tepat di z = 0."
+    },
+    {
+      "kode": "skala_diterapkan",
+      "pembanding": "benar",
+      "nilai": true,
+      "berat": "wajib",
+      "alasan": "Manual three.js menyebut skala pada node sebagai sumber masalah runtime."
+    },
+    {
+      "kode": "bagian",
+      "pembanding": "memuat",
+      "nilai": [
+        "shell",
+        "brain",
+        "glass",
+        "liquid",
+        "face"
+      ],
+      "berat": "wajib",
+      "alasan": "Model separated by parts. Wajah HARUS mesh terpisah supaya bisa dianimasikan sendiri."
+    },
+    {
+      "kode": "tak_manifold",
+      "pembanding": "=",
+      "nilai": 0,
+      "berat": "peringatan",
+      "alasan": "Diukur dari GLB yang diekspor SESUDAH verteksnya dilas menurut posisi. Angka `tak_manifold` dari Blender menghitung indeks MENTAH, dan glTF memecah verteks di tiap jahitan UV — pada aset ini ia melaporkan 30.790 untuk topologi yang sebenarnya bercacat 360.",
+      "ukuran": "topo_tak_manifold"
+    },
+    {
+      "kode": "simpul_lepas",
+      "pembanding": "=",
+      "nilai": 0,
+      "berat": "peringatan",
+      "alasan": "Simpul tanpa sisi tidak terlihat tetapi ikut ke dalam berkas dan ke dalam anggaran."
+    }
+  ]
+}

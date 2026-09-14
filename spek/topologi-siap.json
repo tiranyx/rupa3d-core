@@ -1,0 +1,80 @@
+{
+  "nama": "topologi-siap",
+  "versi": "1.0",
+  "catatan": "Ambang topologi untuk aset yang masuk pipeline produksi. Angkanya dari pengukuran nyata, bukan dari selera — tiap baris menyebut apa yang rusak kalau dilanggar.",
+  "aturan": [
+    {
+      "kode": "topo_tak_manifold",
+      "ukuran": "topo_tak_manifold",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Tepi yang dipakai lebih dari dua muka menggagalkan boolean, solidify, dan cetak 3D. Diukur SESUDAH verteksnya dilas menurut posisi; angka tanpa pengelasan menghitung tiap jahitan UV sebagai lubang dan menggelembung sampai 85x.",
+      "berat": "wajib"
+    },
+    {
+      "kode": "topo_putaran_salah",
+      "ukuran": "topo_putaran_salah",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Segitiga yang arah putarannya terbalik tampak sebagai bercak hitam di render, dan pemeriksa manifold saja TIDAK menangkapnya: tepinya tetap dipakai tepat dua muka.",
+      "berat": "wajib"
+    },
+    {
+      "kode": "topo_degenerasi",
+      "ukuran": "topo_degenerasi",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Segitiga berluas nol tidak terlihat di layar sama sekali dan merusak normal, bake, serta boolean.",
+      "berat": "wajib"
+    },
+    {
+      "kode": "topo_sudut_min",
+      "ukuran": "topo_sudut_min",
+      "pembanding": ">=",
+      "nilai": 1,
+      "alasan": "Segitiga di bawah 1 derajat praktis adalah garis: normalnya tidak stabil, raycast meleset, dan penyelesai fisika menghasilkan gaya liar.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "topo_sliver",
+      "ukuran": "topo_sliver",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Jumlah segitiga sliver. Peringatan, bukan gerbang: mesh hasil tesselasi kurva hampir selalu punya beberapa.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "topo_nisbah_pecah",
+      "ukuran": "topo_nisbah_pecah",
+      "pembanding": "<=",
+      "nilai": 3,
+      "alasan": "Berapa kali verteks digandakan untuk jahitan UV, normal, dan material. Di atas 3 berarti hampir tiap verteks terpecah, dan itu ongkos memori serta bandwidth GPU yang nyata.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "topo_texel_sebaran",
+      "ukuran": "topo_texel_sebaran",
+      "pembanding": "<=",
+      "nilai": 3,
+      "alasan": "Nisbah kerapatan texel persentil-90 terhadap persentil-10. Di atas 3 berarti sebagian model tajam dan sebagian buram pada tekstur yang SAMA, dan itu tidak terlihat sampai teksturnya dipasang.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "topo_uv_di_luar",
+      "ukuran": "topo_uv_di_luar",
+      "pembanding": "<=",
+      "nilai": 0,
+      "alasan": "Segitiga ber-UV di luar 0-1. Sah untuk tekstur berulang, salah untuk atlas dan lightmap. Peringatan supaya niatnya yang memutuskan, bukan alatnya.",
+      "berat": "peringatan"
+    },
+    {
+      "kode": "topo_uv_tumpang_persen",
+      "ukuran": "topo_uv_tumpang_persen",
+      "pembanding": "<=",
+      "nilai": 1,
+      "berat": "peringatan",
+      "satuan": "%",
+      "alasan": "Persen texel terpakai yang ditempati lebih dari satu segitiga. Bake salah satunya akan MENIMPA yang lain, dan lightmap-nya rusak - cacat yang tidak terlihat sampai teksturnya dipanggang. PERINGATAN, bukan gerbang: UV bercermin pada benda simetris dan tekstur berulang keduanya menumpuk UV dengan sengaja dan benar. Yang memutuskan niatnya, bukan alatnya. Diukur dengan mencuplik di PUSAT texel supaya tepi bersama antar-segitiga tidak terhitung sebagai tumpang-tindih."
+    }
+  ]
+}

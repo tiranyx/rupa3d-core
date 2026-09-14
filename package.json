@@ -1,0 +1,71 @@
+{
+  "name": "rupa3d",
+  "version": "1.6.1",
+  "description": "MCP server that builds and proves 3D assets: checks any GLB against a spec without Blender, OCCT b-rep CAD, and embeds the measured certificate inside the GLB.",
+  "mcpName": "io.github.tiranyx/rupa3d",
+  "type": "module",
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "bin": {
+    "rupa3d": "./server.mjs",
+    "rupa": "./rupa.mjs"
+  },
+  "files": [
+    "server.mjs",
+    "rupa.mjs",
+    "adegan-ruang.mjs",
+    "adegan.mjs",
+    "blender.mjs",
+    "cad-ruang.mjs",
+    "cad-sketsa.mjs",
+    "cad.mjs",
+    "draco.mjs",
+    "fisika.mjs",
+    "glb.mjs",
+    "hierarki.mjs",
+    "kulit.mjs",
+    "perbaiki.mjs",
+    "png.mjs",
+    "spek.mjs",
+    "tabrak.mjs",
+    "tekstur.mjs",
+    "terbit.mjs",
+    "topologi.mjs",
+    "turunan.mjs",
+    "ukur-glb.mjs",
+    "karakter.mjs",
+    "runtime/pemandang.html",
+    "bpy/*.py",
+    "spek/*.json",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test --test-concurrency=1 test*.mjs riset/test*.mjs",
+    "test:cepat": "node --test --test-concurrency=1 test-spek.mjs test-turunan.mjs test-topologi.mjs test-tekstur.mjs test-adegan.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "gltf",
+    "glb",
+    "3d",
+    "asset-validation",
+    "blender",
+    "cad",
+    "opencascade",
+    "draco"
+  ],
+  "author": "Fahmi Ghani Ardiyanto",
+  "license": "MIT",
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "0.20.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "brepjs": "4.18.5",
+    "brepjs-opencascade": "0.7.2",
+    "draco3d": "1.5.7",
+    "zod": "4.5.4"
+  }
+}

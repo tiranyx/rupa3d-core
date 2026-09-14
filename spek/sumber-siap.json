@@ -1,0 +1,38 @@
+{
+  "nama": "sumber-siap",
+  "versi": "1.0",
+  "catatan": "Topologi SUMBER — diukur di dalam Blender, bukan dari GLB. Spek ini menilai apakah sebuah mesh bisa DIKERJAKAN LAGI: dideformasi, di-subdivide, di-UV. Itu pertanyaan yang berbeda dari apakah ia siap DIKIRIM, dan berkas kirimnya (glTF) tidak menyimpan jawabannya sama sekali.",
+  "aturan": [
+    {
+      "kode": "sum_quad_persen",
+      "pembanding": ">=",
+      "nilai": 90,
+      "berat": "peringatan",
+      "satuan": "%",
+      "alasan": "Mesh yang quad-dominan bisa di-subdivide, dideformasi, dan di-UV ulang; mesh segitiga tidak. Inilah yang membuat aset generatif menuntut dua sampai empat jam retopology manual - bukan jumlah segitiganya. PERINGATAN, bukan gerbang: aset yang sudah final dan tidak akan dianimasikan tidak perlu quad."
+    },
+    {
+      "kode": "sum_kutub_persen",
+      "pembanding": "<=",
+      "nilai": 5,
+      "berat": "peringatan",
+      "satuan": "%",
+      "alasan": "Kutub adalah verteks DALAM yang valensinya bukan 4. Ia bukan cacat - tiap mesh tertutup menuntut sebagian - tetapi kerapatannya menentukan: kutub di daerah deformasi (siku, lutut, kelopak) membuat lipatannya salah. Verteks BATAS dikeluarkan, karena valensi != 4 di tepi terbuka itu wajar."
+    },
+    {
+      "kode": "sum_quad_tak_sebidang",
+      "pembanding": "<=",
+      "nilai": 0,
+      "berat": "peringatan",
+      "satuan": "quad",
+      "alasan": "Quad yang keempat verteksnya tidak sebidang dibelah jadi dua segitiga, dan Blender, mesin game, serta eksportir glTF masing-masing memilih diagonalnya sendiri. Akibatnya bayangan berubah bentuk saat aset dipindah antar-alat, tanpa satu pun yang salah - cacat yang tidak pernah muncul sebagai galat."
+    },
+    {
+      "kode": "sum_semua_segitiga",
+      "pembanding": "benar",
+      "nilai": false,
+      "berat": "peringatan",
+      "alasan": "Menyala kalau mesh yang diukur SELURUHNYA segitiga. Itu bisa berarti topologinya memang segitiga, ATAU ia diimpor dari glTF/STL yang quad-nya musnah sebelum berkasnya dibaca. Alat ini tidak bisa membedakannya, jadi yang ditandai adalah bahwa angka quad di atas MERAGUKAN - bukan bahwa asetnya buruk."
+    }
+  ]
+}

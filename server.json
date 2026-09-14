@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.tiranyx/rupa3d",
+  "title": "Rupa3D",
+  "description": "Checks GLB assets against a spec without Blender and embeds the measured proof inside the GLB.",
+  "version": "1.6.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "rupa3d",
+      "version": "1.6.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "RUPA3D_BLENDER",
+          "description": "Path to the Blender executable. Only the Blender-backed tools need it; GLB checking, CAD and scenes run without Blender.",
+          "isRequired": false,
+          "format": "filepath"
+        },
+        {
+          "name": "RUPA3D_RUANG",
+          "description": "Workspace directory for scenes and CAD shapes. Default: ~/.rupa3d",
+          "isRequired": false,
+          "format": "filepath"
+        }
+      ]
+    }
+  ]
+}
