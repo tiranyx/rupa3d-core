@@ -120,15 +120,23 @@ export function tambahBadan(d, {
   };
 }
 
+/* Euler (radian) → quaternion, urutan XYZ: matriks Rx·Ry·Rz, sama dengan
+   `obj.rotation.set(x, y, z)` three.js yang dipakai runtime web, dan dengan
+   `putar` "derajat, XYZ" di format adegan (adegan.mjs).
+
+   Sampai 15 Sep 2026 rumus di sini adalah urutan ZYX. Untuk rotasi SATU sumbu
+   hasilnya identik, jadi tidak ada uji yang melihatnya; untuk dua sumbu atau
+   lebih collider berdiri miring dari benda yang terlihat — [30, 45, 0] meleset
+   22,74°. Diuji di test-fisika.mjs lewat matriks, bukan lewat rumus ini. */
 function eulerKeQuat(x, y, z) {
   const [cx, sx] = [Math.cos(x / 2), Math.sin(x / 2)];
   const [cy, sy] = [Math.cos(y / 2), Math.sin(y / 2)];
   const [cz, sz] = [Math.cos(z / 2), Math.sin(z / 2)];
   return {
-    x: sx * cy * cz - cx * sy * sz,
-    y: cx * sy * cz + sx * cy * sz,
-    z: cx * cy * sz - sx * sy * cz,
-    w: cx * cy * cz + sx * sy * sz,
+    x: sx * cy * cz + cx * sy * sz,
+    y: cx * sy * cz - sx * cy * sz,
+    z: cx * cy * sz + sx * sy * cz,
+    w: cx * cy * cz - sx * sy * sz,
   };
 }
 

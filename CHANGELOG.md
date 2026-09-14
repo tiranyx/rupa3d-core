@@ -20,9 +20,14 @@ kurang berguna.
 
 ---
 
-## [Belum dirilis]
+## [1.6.2] — 2026-09-15
+
+**Perbaikan fisika, dan kode sumbernya kini terbuka** di
+[`tiranyx/rupa3d-core`](https://github.com/tiranyx/rupa3d-core).
 
 ### Ditambahkan
+- `repository`, `homepage`, dan `bugs` di `package.json`, serta `repository` di
+  `server.json` — halaman npm dan registri MCP kini menunjuk ke kode sumbernya.
 - `README.md` dalam bahasa Inggris untuk GitHub, npm, dan registri; Indonesia
   pindah ke `README.id.md`.
 - `skrip/ekspor-publik.mjs` + `skrip/publik.txt` — isi repo publik diekspor
@@ -31,12 +36,29 @@ kurang berguna.
 - `contoh/ikon-garis.svg` — ikon netral untuk `contoh/svg-ke-3d.mjs`.
 
 ### Diperbaiki
+- **Paket dikemas dengan akhir baris LF.** Tarball 1.6.1 dibuat dari checkout
+  Windows: ke-42 berkasnya CRLF, termasuk shebang `server.mjs`. Di Mac/Linux
+  itu tidak merusak `npx rupa3d` — `bin-links` milik npm memang mengubah
+  shebang CRLF menjadi LF saat memasang (diperiksa di sumbernya) — tetapi
+  1.6.2 dikemas dari clone repo publik ber-LF.
+- **`tambahBadan({ putar })` memutar collider dengan urutan sumbu yang salah.**
+  Format adegan dan runtime web memakai XYZ (derajat); `fisika.mjs` mengubahnya
+  dengan rumus urutan ZYX. Untuk satu sumbu hasilnya sama, jadi tidak ada uji
+  yang melihatnya; untuk dua sumbu atau lebih collider miring dari benda yang
+  terlihat — `[30, 45, 0]` meleset 22,74°, benda `[90, 0, -22]` di contoh
+  `fisika-tumpukan` 22,00°. Halaman adegan yang diterbitkan TIDAK kena: runtime
+  mengambil rotasi fisika dari quaternion objek three.js. Uji baru membandingkan
+  lewat matriks Rx·Ry·Rz (merah di kode lama); uji silang sekali pakai dengan
+  three.js pada 200 rotasi acak: selisih terburuk 1,54e−7, kode lama 2,0.
 - `test-kulit.mjs` tidak lagi menulis jalur absolut satu mesin; asetnya lewat
   `aset-uji.mjs`, bisa ditimpa `RUPA3D_UJI_KULIT` dan `RUPA3D_UJI_BUNNY`.
 - Alasan lewat untuk `batu-batu.glb` menyebut resepnya
   (`contoh/tekstur-batu.mjs`), bukan "belum ada resep".
 
 ### Terbongkar
+- Konvensi rotasi fisika bertentangan dengan konvensi adegan sejak fisika
+  ditambahkan; ditemukan agen peninjau studio, dikonfirmasi dan diukur ulang
+  sebelum ditambal.
 - Gerbang impor versi pertama meloloskan `import './x'` tanpa `from`; ketahuan
   lewat pelanggaran buatan, bukan lewat pemakaian.
 - "Belum ada resep" untuk `batu-batu.glb` ditulis tanpa mencari; resepnya sudah
@@ -649,6 +671,7 @@ Hari pertama. Tesisnya dinyatakan, dan langsung diuji sampai patah.
 
 ---
 
+[1.6.2]: https://github.com/tiranyx/rupa3d-core/releases/tag/v1.6.2
 [1.6.1]: https://github.com/tiranyx/Rupa3D/commits/main
 [1.6.0]: https://github.com/tiranyx/Rupa3D/commits/main
 [1.5.0]: https://github.com/tiranyx/Rupa3D/commits/main

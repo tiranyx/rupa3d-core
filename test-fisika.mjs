@@ -141,3 +141,59 @@ test('lintasan mencatat tiap langkah, dan waktunya konsisten', async () => {
   assert.ok(Math.abs(l[59].waktu - 1) < 1e-9);
   assert.ok(l[59].y < l[0].y, 'harus turun');
 });
+
+/* ── Rotasi: konvensi yang SAMA dengan adegan dan runtime ───────────────
+ *
+ * Format adegan menulis `putar` sebagai derajat berurutan XYZ (adegan.mjs),
+ * dan runtime web memakai `obj.rotation.set(...)` three.js — juga XYZ. Sampai
+ * 15 Sep 2026 `tambahBadan` mengubahnya dengan rumus urutan ZYX. Untuk satu
+ * sumbu keduanya sama, jadi tak satu pun uji di sini — yang semuanya satu
+ * sumbu atau tanpa rotasi — pernah melihatnya. Ditemukan saat meninjau studio:
+ * lantai yang diputar [30, 45, 0] melompat 22,74° begitu simulasi dijalankan.
+ *
+ * Acuannya dihitung lewat jalan LAIN dari yang diuji: matriks Rx·Ry·Rz
+ * dikalikan ke vektor basis, dibandingkan dengan vektor yang sama diputar
+ * quaternion badan dari Rapier. Membandingkan vektor, bukan quaternion,
+ * menghindari ambiguitas tanda q ≡ −q. */
+
+const radian = (d) => (d * Math.PI) / 180;
+
+function matriksXYZ([dx, dy, dz]) {
+  const [a, b, g] = [radian(dx), radian(dy), radian(dz)];
+  const Rx = [[1, 0, 0], [0, Math.cos(a), -Math.sin(a)], [0, Math.sin(a), Math.cos(a)]];
+  const Ry = [[Math.cos(b), 0, Math.sin(b)], [0, 1, 0], [-Math.sin(b), 0, Math.cos(b)]];
+  const Rz = [[Math.cos(g), -Math.sin(g), 0], [Math.sin(g), Math.cos(g), 0], [0, 0, 1]];
+  const kali = (A, B) => A.map((_, i) => B[0].map((__, j) => A[i].reduce((s, _v, k) => s + A[i][k] * B[k][j], 0)));
+  return kali(kali(Rx, Ry), Rz);
+}
+
+const kenakanMatriks = (M, v) => M.map((baris) => baris[0] * v[0] + baris[1] * v[1] + baris[2] * v[2]);
+
+function putarDenganQuat(q, [x, y, z]) {
+  const tx = 2 * (q.y * z - q.z * y);
+  const ty = 2 * (q.z * x - q.x * z);
+  const tz = 2 * (q.x * y - q.y * x);
+  return [
+    x + q.w * tx + (q.y * tz - q.z * ty),
+    y + q.w * ty + (q.z * tx - q.x * tz),
+    z + q.w * tz + (q.x * ty - q.y * tx),
+  ];
+}
+
+test('putar badan mengikuti urutan XYZ adegan — juga untuk rotasi DUA dan TIGA sumbu', async () => {
+  const d = await dunia();
+  const kasus = [[30, 45, 0], [10, 20, 30], [90, 0, -22], [-35, 120, 60], [0, 0, -22], [0, 63, 0]];
+  for (const putar of kasus) {
+    const { badan } = tambahBadan(d, { jenis: 'statis', bentuk: 'kotak', ukuran: [1, 1, 1], putar });
+    const q = badan.rotation();
+    const M = matriksXYZ(putar);
+    for (const basis of [[1, 0, 0], [0, 1, 0], [0, 0, 1]]) {
+      const harap = kenakanMatriks(M, basis);
+      const dapat = putarDenganQuat(q, basis);
+      const selisih = Math.max(...harap.map((h, i) => Math.abs(h - dapat[i])));
+      // Rapier menyimpan quaternion dalam float32: galat ~1e-7 wajar, 1e-5 tidak.
+      assert.ok(selisih < 1e-5,
+        `putar [${putar}] sumbu [${basis}]: harap [${harap.map((v) => v.toFixed(4))}], dapat [${dapat.map((v) => v.toFixed(4))}]`);
+    }
+  }
+});

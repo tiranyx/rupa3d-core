@@ -1,8 +1,16 @@
 {
   "name": "rupa3d",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "MCP server that builds and proves 3D assets: checks any GLB against a spec without Blender, OCCT b-rep CAD, and embeds the measured certificate inside the GLB.",
   "mcpName": "io.github.tiranyx/rupa3d",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tiranyx/rupa3d-core.git"
+  },
+  "homepage": "https://github.com/tiranyx/rupa3d-core#readme",
+  "bugs": {
+    "url": "https://github.com/tiranyx/rupa3d-core/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=22.14.0"

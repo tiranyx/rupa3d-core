@@ -3,12 +3,16 @@
   "name": "io.github.tiranyx/rupa3d",
   "title": "Rupa3D",
   "description": "Checks GLB assets against a spec without Blender and embeds the measured proof inside the GLB.",
-  "version": "1.6.1",
+  "repository": {
+    "url": "https://github.com/tiranyx/rupa3d-core",
+    "source": "github"
+  },
+  "version": "1.6.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "rupa3d",
-      "version": "1.6.1",
+      "version": "1.6.2",
       "transport": {
         "type": "stdio"
       },
