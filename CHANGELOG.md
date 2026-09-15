@@ -50,12 +50,23 @@ kurang berguna.
   mengambil rotasi fisika dari quaternion objek three.js. Uji baru membandingkan
   lewat matriks Rx·Ry·Rz (merah di kode lama); uji silang sekali pakai dengan
   three.js pada 200 rotasi acak: selisih terburuk 1,54e−7, kode lama 2,0.
+- **Karakter tersendat saat berjalan di lantai datar.** `langkahKarakter`
+  menambahkan gravitasi juga saat karakter menapak, sehingga tiap langkah
+  mendorongnya ~5 mm ke lantai. Dorongan itu masuk ke kulit offset pengendali, dan
+  sesekali seluruh gerak langkah itu, termasuk horizontal, terbuang: **7 dari 600
+  langkah** tidak bergerak. Sekarang karakter yang menapak dan tidak naik tidak
+  diberi gerak vertikal; turun tangga dan lereng tetap menempel lewat
+  snap-to-ground. Ditemukan dan diukur lebih dulu oleh sesi Galantara
+  (12 dari 600 dengan konstantanya sendiri).
 - `test-kulit.mjs` tidak lagi menulis jalur absolut satu mesin; asetnya lewat
   `aset-uji.mjs`, bisa ditimpa `RUPA3D_UJI_KULIT` dan `RUPA3D_UJI_BUNNY`.
 - Alasan lewat untuk `batu-batu.glb` menyebut resepnya
   (`contoh/tekstur-batu.mjs`), bukan "belum ada resep".
 
 ### Terbongkar
+- 12 uji karakter lolos walau karakter tersendat, karena uji berjalan hanya
+  memeriksa jarak akhir dengan toleransi 5 %. Uji baru memeriksa TIAP langkah dari
+  600 (merah di kode lama: 7 langkah diam).
 - Konvensi rotasi fisika bertentangan dengan konvensi adegan sejak fisika
   ditambahkan; ditemukan agen peninjau studio, dikonfirmasi dan diukur ulang
   sebelum ditambal.

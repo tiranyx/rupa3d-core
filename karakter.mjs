@@ -74,12 +74,17 @@ export function langkahKarakter(k, {
   if (p > 1e-9) { mx /= p; mz /= p; } else { mx = 0; mz = 0; }
 
   const menapak = k.kendali.computedGrounded();
-  if (menapak && k.vY < 0) k.vY = 0;
   if (menapak && lompat) k.vY = LOMPAT;
-  k.vY -= gravitasi * d;
+  /* Menapak dan tidak sedang naik: gravitasi TIDAK ditambahkan. Dulu vY = −g·dt tiap langkah
+     mendorong karakter ~5 mm ke lantai; dorongan itu masuk ke kulit offset pengendali dan sesekali
+     seluruh gerak langkah itu — termasuk horizontal — terbuang (diukur 7 dari 600 langkah; Galantara
+     15 Sep 2026: 12 dari 600). Turun anak tangga dan lereng tetap menempel lewat snap-to-ground. */
+  let gerakY;
+  if (menapak && k.vY <= 0) { k.vY = 0; gerakY = 0; }
+  else { k.vY -= gravitasi * d; gerakY = k.vY * d; }
 
   k.kendali.computeColliderMovement(k.collider, {
-    x: mx * kecepatan * d, y: k.vY * d, z: mz * kecepatan * d,
+    x: mx * kecepatan * d, y: gerakY, z: mz * kecepatan * d,
   });
   const g = k.kendali.computedMovement();
   const t = k.badan.translation();

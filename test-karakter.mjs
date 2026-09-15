@@ -36,6 +36,25 @@ test('berjalan maju menempuh jarak yang mendekati kecepatan × waktu', async () 
     `menempuh ${jarak.toFixed(3)} m, harusnya sekitar ${diharap} m`);
 });
 
+/* Uji di atas lolos dengan toleransi 5 % pada JARAK AKHIR, jadi langkah yang tersendat tidak
+   terlihat. Galantara (15 Sep 2026) mengukur tiap langkah: karakter yang MENAPAK tetap didorong
+   gravitasi ke bawah (≈5 mm/langkah), dorongan masuk ke kulit offset, lalu sesekali seluruh gerak —
+   termasuk horizontal — terbuang. Maka yang diperiksa di sini TIAP langkah, bukan hanya akhirnya. */
+test('berjalan lurus di lantai datar: TIDAK ADA langkah yang tersendat', async () => {
+  const d = await panggung();
+  const k = buatKarakter(d, { posisi: [0, 1, 0] });
+  jalanKarakter(k, { detik: 0.5 });                       // mendarat dan tenang dulu
+  const perLangkah = KECEPATAN / 60, awal = k.badan.translation().z;
+  const tersendat = [];
+  for (let i = 0; i < 600; i++) {
+    const { gerak } = langkahKarakter(k, { dt: 1 / 60, arah: [0, -1] });
+    if (Math.abs(gerak[2]) < 0.9 * perLangkah) tersendat.push(`#${i}: ${gerak[2].toFixed(4)}`);
+  }
+  const jarak = Math.abs(k.badan.translation().z - awal);
+  assert.equal(tersendat.length, 0, `${tersendat.length} dari 600 langkah bergerak < 90 % dari ${perLangkah} m: ${tersendat.slice(0, 5).join(', ')}`);
+  assert.ok(Math.abs(jarak - KECEPATAN * 10) < 0.005 * KECEPATAN * 10, `menempuh ${jarak.toFixed(3)} m dari ${KECEPATAN * 10} m`);
+});
+
 test('arah diagonal TIDAK lebih cepat daripada lurus', async () => {
   /* Kesalahan klasik: menjumlahkan dua masukan tanpa menormalkan, sehingga
      berjalan diagonal 1,41x lebih cepat. Pemain menemukannya dalam semenit;

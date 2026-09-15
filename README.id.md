@@ -12,7 +12,7 @@ pipeline membuktikannya dengan angka, regresi menggagalkan build.
 bangun (kode)  →  render  →  UKUR  →  banding ke spek  →  iterasi
 ```
 
-> **Keadaan** — 1.6.2 · 296 uji · MIT · npm [`rupa3d`](https://www.npmjs.com/package/rupa3d)
+> **Keadaan** — 1.6.2 · 297 uji · MIT · npm [`rupa3d`](https://www.npmjs.com/package/rupa3d)
 > · registri MCP `io.github.tiranyx/rupa3d`. Dikembangkan dan diuji di
 > Windows 11 dengan Node 22.
 
@@ -129,7 +129,7 @@ tepi tak-manifold. Contoh terkerja: [`contoh/svg-ke-3d.mjs`](contoh/svg-ke-3d.mj
 
 ```bash
 npm install
-npm test                          # SELURUHNYA — 296 uji, 21 berkas
+npm test                          # SELURUHNYA — 297 uji, 21 berkas
 
 node --test test.mjs              # 14  Blender SUNGGUHAN, termasuk mode berantai
 node --test test-mcp.mjs          # 15  lewat PINTU MCP, termasuk dari direktori asing
@@ -141,7 +141,7 @@ node --test test-turunan.mjs      # 11  kosakata turunan
 node --test test-adegan.mjs       # 23  adegan & terbit
 node --test test-fisika.mjs       # 14  fisika, terhadap mekanika dasar dan rotasi XYZ
 node --test test-tabrak.mjs       # 11  proksi tabrakan
-node --test test-karakter.mjs     # 12  kendali pemain
+node --test test-karakter.mjs     # 13  kendali pemain
 node --test test-topologi.mjs     # 23  topologi GLB, thd bentuk yang dihitung di kepala
 node --test test-sumber.mjs       # 12  topologi SUMBER (torus, kubus, ikosahedron)
 node --test test-tekstur.mjs      # 21  tekstur + dekoder PNG sendiri
@@ -189,7 +189,7 @@ sebuah berkas "hilang"; hampir selalu ia ada, di akar yang satunya.
 ## Disiplin
 
 Uji dijalankan terhadap **Blender, OCCT, dan Rapier sungguhan, bukan mock** —
-**296 uji, 21 berkas**, dan salah satunya lewat **stdio MCP sungguhan**.
+**297 uji, 21 berkas**, dan salah satunya lewat **stdio MCP sungguhan**.
 
 Yang terakhir itu ada karena suite lain menguji PUSTAKANYA, dan dua kemampuan
 yang lengkap dan benar pernah **tidak bisa dicapai** lewat MCP — sementara 201

@@ -14,7 +14,7 @@ command-line gate.
 
 [Bahasa Indonesia](README.id.md)
 
-> **Status** — 1.6.2 · 296 tests · MIT · on npm as
+> **Status** — 1.6.2 · 297 tests · MIT · on npm as
 > [`rupa3d`](https://www.npmjs.com/package/rupa3d) · in the official MCP
 > Registry as `io.github.tiranyx/rupa3d`.
 > Developed and tested on Windows 11 with Node 22. Tool descriptions and
@@ -104,7 +104,7 @@ npm install
 npm test
 ```
 
-296 tests run against real Blender, OpenCascade and Rapier — not mocks — and
+297 tests run against real Blender, OpenCascade and Rapier — not mocks — and
 one suite talks to the server over real MCP stdio, including from a foreign
 working directory the way an MCP client launches it. Tests that need a local
 asset are skipped with the reason and how to obtain it; `node
